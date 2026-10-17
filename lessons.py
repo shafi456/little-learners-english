@@ -6,7 +6,7 @@ from difflib import get_close_matches
 
 LESSONS = {
     1: [  # Level 1: single words
-        {"q": "What animal is this? 🐶", "answers": ["dog", "puppy"], "show": "dog",
+        {"q": "What animal is this? 🐶", "answers": ["dog", "puppy", "doggy"], "show": "dog",
          "wrong": ["cat", "fish"], "hint": "It says woof woof! 🐾"},
         {"q": "What color is this apple? 🍎", "answers": ["red"], "show": "red",
          "wrong": ["blue", "green"], "hint": "It's the color of a fire truck! 🚒"},
@@ -24,7 +24,11 @@ LESSONS = {
          "wrong": ["sad", "angry"], "hint": "This face is smiling! 😁"},
         {"q": "How many, and what animal? 🐱🐱", "answers": ["two cat"], "show": "two cats",
          "wrong": ["two dogs", "one cat"], "hint": "Count them... and they say meow!"},
-        {"q": "How does this face feel? 😢", "answers": ["sad"], "show": "sad",
+        {"q": "How does this face feel? 😢", "answers": ["are you ok", "are you okay", 
+                                                         "are you sad", "i am here", "do not be sad",
+                                                         "do not cry", "it is ok", "it is okay", 
+                                                         "hug", "sorry", "i love you", "play with me"], 
+                                                         "show": "sad",
          "wrong": ["happy", "sleepy"], "hint": "This face has a tear... 💧"},
         {"q": "We say this when we wake up! ☀️ Good ___?", "answers": ["morning"],
          "show": "Good morning", "wrong": ["Good night", "Thank you"], "hint": "It starts with M... 🌅"},
@@ -49,13 +53,16 @@ LESSONS = {
 }
 
 NUMBERS = {"1": "one", "2": "two", "3": "three", "4": "four", "5": "five"}
+SHORT_FORMS = {"im": "i am", "its": "it is", "dont": "do not", "cant": "can not", "cannot": "can not",
+                "u": "you", "r": "are"}
 
 
 def clean(text):
-    """'I'm 2!!' -> 'i am two'"""
-    text = text.lower().replace("i'm", "i am").replace("it's", "it is")
+    """Tidy up the child's words: I'm 2!! -> i am two, u r ok -> you are ok."""
+    text = text.lower().replace("'", "").replace("’", "")
     text = re.sub(r"[^a-z0-9\s]", " ", text)
-    return " ".join(NUMBERS.get(word, word) for word in text.split())
+    words = [SHORT_FORMS.get(w, NUMBERS.get(w, w)) for w in text.split()]
+    return " ".join(words)
 
 
 def base(word):

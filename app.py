@@ -11,7 +11,7 @@ def respond(message, child):
         return "", child["history"], child
     start = time.perf_counter()
     tutor.handle(child, message)
-    print(f"Reply time: {time.perf_counter() - start:.2f} s", flush=True)
+    print(f"Reply time: {time.perf_counter() - start:.2f} s | mode: {child['mode']} ({child['reason']})", flush=True)
     return "", child["history"], child
 
 
