@@ -19,6 +19,26 @@ MODEL = "openai/gpt-oss-120b"
 PROMPT = (Path(__file__).parent / "prompt.md").read_text(encoding="utf-8")
 LEVELS = ["L1", "L2", "L3"]
 
+# Safety words are checked in code, before the AI, so safety never depends on the AI noticing.
+EMERGENCY = ["not moving", "not breathing", "cant breathe", "bleeding", "blood", "on fire", "unconscious"]
+DANGER = ["knife", "knives", "gun", "matches", "lighter", "pills", "poison", "kill", "hit me", "hurt me",
+          "hurting me", "touched me"]
+EMERGENCY_REPLY = ("This is very important. Please run and get Mommy, Daddy or another grown-up right now! "
+                   "If no grown-up is there, call 999.")
+DANGER_REPLY = "Stop, that can hurt someone. Please do not touch it. Go and tell Mommy, Daddy or your teacher right now."
+
+
+def safety_reply(message):
+    """Returns a fixed safety reply if the message mentions danger, otherwise None."""
+    clean = message.lower().replace("'", "").replace("’", "")
+    words = "".join(c if c.isalnum() else " " for c in clean).split()
+    text = f" {' '.join(words)} "
+    if any(f" {w} " in text for w in EMERGENCY):
+        return EMERGENCY_REPLY
+    if any(f" {w} " in text for w in DANGER):
+        return DANGER_REPLY
+    return None
+
 
 def new_child():
     return {"level": "L1", "correct": 0, "struggles": 0, "streak": 0, "turn": 0, "mode": None,
@@ -80,16 +100,26 @@ def update(child, state):
 
 def talk(child, profile, message):
     """One turn: send the prompt, the recent chat and the child's state; read back Beepy's words and notes."""
+    urgent = safety_reply(message)
+    if urgent:  # skip the AI completely: a fixed, serious reply
+        note = {"mode": "SUPPORT", "detected_mood": "scared", "level_action": "hold",
+                "next_turn_recommendation": "stay calm and serious, keep asking the child to get a grown-up"}
+        child["mode"], child["mood"], child["streak"] = "SAFETY", "scared", 0
+        child["history"] += [{"role": "user", "content": message},
+                                {"role": "assistant", "content": f"{urgent}\n|||STATE|||\n{json.dumps(note)}"}]
+        child["chat"] += [{"role": "user", "content": message}, {"role": "assistant", "content": urgent}]
+        child["turn"] += 1
+        return urgent
     context = json.dumps(runtime_context(child, profile), ensure_ascii=False)
     messages = [{"role": "system", "content": PROMPT}]  # identical every time, so Groq can cache it
-    messages += child["history"][-8:]  # the last 4 exchanges
+    messages += child["history"][-6:]  # the last 4 exchanges
     messages.append({"role": "user", "content": f"[RUNTIME_CONTEXT]\n{context}\n\n[CHILD SAYS]\n{message}"})
 
     try:
         response = client.chat.completions.create(
             model=MODEL,
             messages=messages,
-            max_completion_tokens=1000,
+            max_completion_tokens=500,
             extra_body={"reasoning_effort": "low"},
         )
         raw = response.choices[0].message.content or ""
