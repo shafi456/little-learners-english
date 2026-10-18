@@ -4,8 +4,8 @@ Beepy is an AI chatbot that teaches English to children under 7 through play, ch
 
 - **Live app:** https://little-learners-english.onrender.com
 - **Video (under 2 minutes):** https://youtu.be/ztN0dh9Wrtc
-- **System design:** [docs/SYSTEM_DESIGN.md](docs/SYSTEM_DESIGN.md)
-- **Full teaching spec:** [docs/pedagogy.md](docs/pedagogy.md)
+- **System design:** https://github.com/shafi456/little-learners-english/blob/main/docs/SYSTEM_DESIGN.md
+- **Full teaching spec:** https://github.com/shafi456/little-learners-english/blob/main/docs/pedagogy.md
 
 ## What it does
 
