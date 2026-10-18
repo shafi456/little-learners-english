@@ -76,7 +76,7 @@ Create a file named `.env` containing `GROQ_API_KEY=your_key` (a free key from c
 
 ## Performance
 
-**Live app:** [N] AI replies on 18 October 2026, average [x.xx] s, slowest [x.xx] s (measured on the server and shown in the side panel).
+**Live app:** [10] AI replies on 18 October 2026, average [0.94] s, slowest [1.47] s (measured on the server and shown in the side panel).
 
 **Model comparison** (first version of the app, short prompt, measured on my laptop):
 
